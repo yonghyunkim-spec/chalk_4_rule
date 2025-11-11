@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__serena__find_symbol",
+      "mcp__sequential-thinking__create_task",
+      "Bash(docker exec:*)",
+      "Bash(./gradlew bootRun:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(mkdir:*)",
+      "Bash(sed:*)",
+      "Bash(rm:*)",
+      "Bash(mv:*)",
+      "Bash(if not exist \"C:\\Users\\user\\Documents\\Obsidian Vault\\0.1 Admin\\2025\\11월\" mkdir \"C:\\Users\\user\\Documents\\Obsidian Vault\\0.1 Admin\\2025\\11월\")",
+      "Bash(wc:*)",
+      "Bash(done)",
+      "Bash(./gradlew clean build:*)",
+      "Bash(grep:*)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "serena",
+    "sequential-thinking"
+  ]
+}
