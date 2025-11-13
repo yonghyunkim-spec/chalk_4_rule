@@ -16,7 +16,9 @@
       "Bash(wc:*)",
       "Bash(done)",
       "Bash(./gradlew clean build:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(dir /S /B \"C:\\Users\\user\\Documents\\chalk_4_rule\")",
+      "Bash(dir:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

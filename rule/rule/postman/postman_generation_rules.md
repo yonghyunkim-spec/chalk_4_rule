@@ -9,20 +9,6 @@ Controller 클래스를 분석하여 Postman v2.1 포맷의 완전한 컬렉션�
 - `/generate-postman` 슬래시 커맨드
 - `/sync-postman` 슬래시 커맨드
 
-## ⚠️ 조인 관계 API는 별도 규칙 참고
-
-**조인 관계 API**(QuestionKeyword, QuestionChapter, QuestionLectureSet 등)는 일반 CRUD API와 다른 구조를 가지므로 다음 문서를 **반드시 함께 참고**해야 합니다:
-
-📄 **[Postman 조인 관계 API 생성 규칙](./postman_join_relation_rules.md)**
-
-조인 관계 API의 특징:
-- 양방향 조회 API (A→B, B→A)
-- 복합키 DELETE (두 개의 Path Variable)
-- 벌크 추가 API (`/list` 엔드포인트)
-- 수정(PUT) API 없음
-
-이 문서는 **일반 CRUD API**를 위한 기본 규칙을 다룹니다.
-
 ## 📁 출력 경로 규칙
 
 ### 파일 경로 패턴
@@ -52,11 +38,27 @@ lecture_APIs.postman_collection.json
 | PUT | 수정 | `{resource} modify` |
 | DELETE | 삭제 | `{resource} delete` |
 
-**올바른 예시**: `question info`, `question list`, `question add`, `question modify`, `question delete`
+### 예시
 
-**잘못된 예시**: ❌ `Get Question`, ❌ `Question Info`, ❌ `getQuestion`, ❌ `Create Question`
+```
+question info          (GET /admin/v1/questions/{id})
+question list          (GET /admin/v1/questions/list)
+question list count    (GET /admin/v1/questions/list/count)
+question add           (POST /admin/v1/questions)
+question modify        (PUT /admin/v1/questions/{id})
+question delete        (DELETE /admin/v1/questions/{id})
+```
 
-**핵심 규칙**: 소문자 + 공백, 동사는 add/modify/delete 사용 (create/update/remove 사용 금지)
+### 잘못된 네이밍
+
+```
+❌ Get Question
+❌ Question Info
+❌ getQuestion
+❌ Create Question
+❌ Update Question
+❌ Remove Question
+```
 
 ## 🔍 Controller 분석 규칙
 
@@ -207,24 +209,6 @@ Postman Request Body:
 
 **⚠️ 중요**: `Bearer` 키워드는 **포함하지 않습니다**. Postman에서 토큰 값에 자동으로 추가됩니다.
 
-### HTTP Method별 Header 규칙
-
-**⚠️ 중요: Content-Type 헤더는 Request Body가 있는 메서드에만 포함**
-
-| HTTP Method | Authorization 헤더 | Content-Type 헤더 | 이유 |
-|-------------|-------------------|-------------------|------|
-| GET | ✅ 필요 | ❌ 불필요 | Request Body 없음 |
-| POST | ✅ 필요 | ✅ 필요 | Request Body 있음 |
-| PUT | ✅ 필요 | ✅ 필요 | Request Body 있음 |
-| DELETE | ✅ 필요 | ❌ 불필요 | Request Body 없음 |
-| PATCH | ✅ 필요 | ✅ 필요 | Request Body 있음 |
-
-**핵심 원칙**: Request Body 여부로 Content-Type 결정
-
-**예시**:
-- GET/DELETE: `[{"key": "Authorization", "value": "{{jwt token}}"}]`
-- POST/PUT/PATCH: 위 + `{"key": "Content-Type", "value": "application/json"}`
-
 ## 📄 Request Body 생성 규칙
 
 ### 1. 제외 필드
@@ -299,6 +283,10 @@ Postman Request Body:
         "key": "Authorization",
         "value": "{{jwt token}}",
         "type": "string"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
       }
     ],
     "url": {
@@ -324,6 +312,10 @@ Postman Request Body:
         "key": "Authorization",
         "value": "{{jwt token}}",
         "type": "string"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
       }
     ],
     "url": {
@@ -362,41 +354,8 @@ Postman Request Body:
 ```
 
 **Query Parameter 규칙**:
-- page, limit: **enabled** (필수 파라미터, 항상 활성)
-- 필터 파라미터: **disabled** (선택적 파라미터, 필요 시 수동으로 활성화)
-- 검색 파라미터: **disabled** (선택적 파라미터, 필요 시 수동으로 활성화)
-
-**이유**: 필수 파라미터는 바로 사용 가능하도록 enabled, 선택적 파라미터는 필요 시만 사용하도록 disabled 설정
-
-### GET (리스트 카운트)
-
-```json
-{
-  "name": "{domain} list count",
-  "request": {
-    "method": "GET",
-    "header": [
-      {
-        "key": "Authorization",
-        "value": "{{jwt token}}",
-        "type": "string"
-      }
-    ],
-    "url": {
-      "raw": "{{server url}}/admin/v1/{domains}/list/count",
-      "host": ["{{server url}}"],
-      "path": ["admin", "v1", "{domains}", "list", "count"]
-    },
-    "description": "{Domain} 목록 개수 조회 API"
-  },
-  "response": []
-}
-```
-
-**특징**:
-- URL 패턴: `/list/count` (리스트 URL에 `/count` 추가)
-- Request Body 없음
-- Content-Type 헤더 없음 (GET 메서드)
+- page, limit: enabled (항상 활성)
+- 필터 파라미터: disabled (선택적으로 활성화)
 
 ### POST (추가)
 
@@ -519,11 +478,6 @@ Postman Request Body:
 - [ ] GET list request에 page=1, limit=10이 포함되었는가?
 - [ ] disabled: true인 query parameter가 적절히 설정되었는가?
 
-### Header 관련 확인 ⚠️
-- [ ] GET, DELETE 메서드에 Content-Type 헤더가 **없는가**?
-- [ ] POST, PUT, PATCH 메서드에만 Content-Type 헤더가 **있는가**?
-- [ ] Content-Type 값이 "application/json"인가?
-
 ### Enum 관련 확인
 - [ ] 모든 Enum 필드에 대해 실제 Enum 파일을 읽었는가? ⚠️
 - [ ] Enum 값을 추론하지 않았는가? ⚠️
@@ -542,29 +496,66 @@ Postman Request Body:
 ## ⚠️ 자주 발생하는 실수
 
 ### 1. Enum 값 표현
-❌ `"questionType": 0` → ✅ `"questionType": "SUBJECTIVE"`
+```json
+// ❌ 잘못된 예 (ordinal 숫자)
+{
+  "questionType": 0
+}
 
-**이유**: Enum은 ordinal 숫자가 아닌 이름(문자열)으로 표현. 실제 Enum 파일을 읽어서 정확한 값 사용 필수.
+// ✅ 올바른 예 (Enum 이름)
+{
+  "questionType": "SUBJECTIVE"
+}
+```
 
 ### 2. 페이징 파라미터
-❌ `"page": 0` → ✅ `"page": 1`
+```json
+// ❌ page를 0부터 시작
+{
+  "page": 0,
+  "limit": 10
+}
 
-**이유**: 이 프로젝트에서 page는 1부터 시작. offset과 혼동하지 말 것.
+// ✅ page는 1부터 시작
+{
+  "page": 1,
+  "limit": 10
+}
+```
 
 ### 3. adminId 필드
-❌ `{"adminId": 1, "title": "Test"}` → ✅ `{"title": "Test"}`
+```json
+// ❌ adminId 포함
+{
+  "adminId": 1,
+  "title": "Test"
+}
 
-**이유**: @JsonIgnore 필드는 Request Body에서 제외. adminId는 Controller에서 자동 설정.
+// ✅ adminId 제외
+{
+  "title": "Test"
+}
+```
 
 ### 4. 환경 변수 사용
-❌ `"url": "http://localhost:8080/admin/v1/questions"` → ✅ `"url": "{{server url}}/admin/v1/questions"`
+```json
+// ❌ 하드코딩
+"url": "http://localhost:8080/admin/v1/questions"
 
-**이유**: 하드코딩 금지. 환경 변수 `{{server url}}`, `{{jwt token}}` 사용으로 중앙 관리.
+// ✅ 변수 사용
+"url": "{{server url}}/admin/v1/questions"
+```
 
 ### 5. Request 이름
-❌ `"Get Question"`, `"Create Question"` → ✅ `"question info"`, `"question add"`
+```json
+// ❌ 자유로운 이름
+"name": "Get Question"
+"name": "Create Question"
 
-**이유**: 네이밍 규칙 준수 필수. 소문자 + 공백, 동사는 add/modify/delete 사용.
+// ✅ 네이밍 규칙 준수
+"name": "question info"
+"name": "question add"
+```
 
 ## 🔗 참조 문서
 

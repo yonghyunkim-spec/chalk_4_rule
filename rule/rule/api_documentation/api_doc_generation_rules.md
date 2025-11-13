@@ -531,33 +531,13 @@ mcp__serena__find_symbol:
 
 ### 2. Request Header
 
-**⚠️ Content-Type 헤더 규칙**:
-
-Content-Type 헤더는 **Request Body가 있는 경우에만 포함**합니다:
-
-| HTTP Method | Request Body 여부 | Content-Type 필요 여부 |
-|-------------|------------------|---------------------|
-| POST | 있음 | ✅ 필요 |
-| PUT | 있음 | ✅ 필요 |
-| PATCH | 있음 | ✅ 필요 |
-| GET | 없음 (Query Parameters) | ❌ 불필요 |
-| DELETE | 없음 | ❌ 불필요 |
-
 ```markdown
-# ✅ POST/PUT/PATCH (Request Body 있음)
 ## Request Header
 
 | name | type | description | required |
 |------|------|-------------|-----------|
 | Authorization | String | JWT 인증 토큰 | ✅ |
 | Content-Type | String | `application/json` | ✅ |
-
-# ✅ GET/DELETE (Request Body 없음)
-## Request Header
-
-| name | type | description | required |
-|------|------|-------------|-----------|
-| Authorization | String | JWT 인증 토큰 | ✅ |
 ```
 
 **⚠️ 중요 규칙**:
@@ -1190,44 +1170,8 @@ curl -H "Authorization: {JWT_TOKEN}"
 
 - **템플릿**: `rule/api_documentation/api_doc_template.md`
 - **예시**: `rule/api_documentation/api_doc_examples.md`
-- **조인 관계 API 전용 규칙**: `rule/api_documentation/api_doc_join_relation_rules.md` ⭐ **NEW**
 - **슬래시 커맨드**: `.claude/commands/generate-api-doc.md`
 - **가이드**: `guide/api_doc_auto_template.md`
-
----
-
-## 🔄 조인 관계 API 문서화 시 참고사항
-
-**조인 테이블 기반 관계 관리 API** (예: QuestionKeyword, QuestionChapter)를 문서화할 때는 이 문서의 기본 규칙과 함께 **조인 관계 API 전용 규칙**을 반드시 참고하세요:
-
-📖 **조인 관계 API 전용 규칙**: `rule/api_documentation/api_doc_join_relation_rules.md`
-
-### 조인 관계 API 특징
-
-1. **복합키(Composite Key) 사용**: questionId + keywordId
-2. **양방향 조회**: A→B, B→A 모두 지원
-3. **조인된 VO**: 관계 메타데이터 + 조인된 엔티티 데이터
-4. **벌크 추가**: 1:N 관계 일괄 생성 (`/list` 엔드포인트)
-5. **수정 API 없음**: 관계는 추가/삭제만 가능
-
-### 적용 대상
-
-- QuestionKeywordController
-- QuestionChapterController
-- QuestionLectureSetController
-- 기타 조인 테이블 기반 Controller
-
-### 주요 차이점
-
-| 항목 | 일반 CRUD API | 조인 관계 API |
-|------|--------------|--------------|
-| Primary Key | 단일 키 (Long id) | 복합 키 (id1 + id2) |
-| 조회 방향 | 단방향 | 양방향 (A→B, B→A) |
-| Response | 단일 엔티티 데이터 | 관계 + 조인된 데이터 |
-| 수정 API | 있음 (PUT) | 없음 |
-| 벌크 추가 | 일반적으로 없음 | `/list` 엔드포인트로 제공 |
-
-**⚠️ 중요**: 조인 관계 API 문서화 시 반드시 전용 규칙을 참고하여 누락이 없도록 하세요.
 
 ---
 
